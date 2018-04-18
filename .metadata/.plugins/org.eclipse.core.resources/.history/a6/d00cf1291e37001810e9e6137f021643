@@ -1,0 +1,264 @@
+package mlcs_classical_ex;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.ListIterator;
+import java.util.Map;
+import java.util.Set;
+
+public class NCSG { // construct a picture
+	public Map<Integer, dominant> DM = new HashMap<Integer, dominant>(); // a
+																			// set
+																			// for
+																			// dominant
+	// point
+	public int maxIndex;
+	public LinkedList<LinkedList<dominant>> D = new LinkedList<LinkedList<dominant>>(); // a
+																						// list
+																						// composed
+																						// of
+																						// lists
+	public ArrayList<Integer> opt_sub_dom = new ArrayList<Integer>(); // a list
+																		// for
+																		// save
+																		// index
+																		// of
+																		// points
+																		// in
+																		// optimal
+																		// subgraph
+
+	void fill_DM(Set<dominant> su){ //put all the point in the set into DM
+		Map<Integer, dominant> temp_DM = new HashMap<Integer, dominant>();
+		Iterator<dominant> itsu = su.iterator();
+		while(itsu.hasNext()){
+			dominant dom = itsu.next();
+			temp_DM.put(dom.indexofpoint, dom);// put the point into temporary map
+		}
+		DM.putAll(temp_DM);
+	}
+	
+	LinkedList<dominant> fill_queue(LinkedList<dominant> Dk) { // fill the queue
+		LinkedList<dominant> queue = new LinkedList<dominant>();
+		// fill the queue with successor of all dominant of Dk
+		Iterator<dominant> itq = Dk.iterator();
+		while (itq.hasNext()) { // add successor to Dk
+			Set<dominant> su = itq.next().successor;
+			queue.addAll(su);
+			//put the points into DM
+			fill_DM(su);
+		}
+		return queue;
+	}
+
+	public int cal_dom_sum(List<Integer> coordinate){ //calculate the sum of coordinate
+		int dom_sum=0;
+		Iterator<Integer> itdc = coordinate.iterator();
+		while(itdc.hasNext()){
+			dom_sum=dom_sum+itdc.next();
+		}
+		return dom_sum;
+	}
+	
+	public dominant cal_opt_dom(LinkedList<dominant> Dk){ //calculate for the optimal point
+		int min_dom_sum;
+		dominant opt_dom;
+		Iterator<dominant> itdk =Dk.iterator();
+		opt_dom=itdk.next();
+		min_dom_sum = cal_dom_sum(opt_dom.coordinate);
+		while (itdk.hasNext()){ //through points in Dk
+			dominant temp_dom =itdk.next();
+			List<Integer> temp_coo =temp_dom.coordinate;
+			int temp_dom_sum =cal_dom_sum(temp_coo) ;
+			if (temp_dom_sum<min_dom_sum){ //find a smaller one
+				min_dom_sum = temp_dom_sum;
+				opt_dom = temp_dom;
+			}
+			else if (temp_dom_sum==min_dom_sum){ //equal, compare number in every dimension
+				Iterator<Integer> itdct = temp_coo.iterator();
+				Iterator<Integer> itdco =opt_dom.coordinate.iterator();
+				while (itdct.hasNext()){
+					int temp_val =itdct.next().intValue();
+					int opt_val = itdco.next().intValue();
+					if (temp_val<opt_val){ //the number is not the same
+						min_dom_sum = temp_dom_sum;
+						opt_dom = temp_dom;
+						break;
+					}
+				}
+			}
+		}
+		return opt_dom;
+	}
+	
+	public void OptCalReusing(List<int[][]> STL, int d, char[] alphabet) { // optimal calculation and reusing
+		LinkedList<dominant> Dk = new LinkedList<dominant>();
+		D.add(Dk);
+		
+		// add a dummy source point
+		dominant source_point = new dominant(STL,d,alphabet);
+		source_point.source(d);
+		DM.put(source_point.indexofpoint, source_point);
+		
+		//D0->D1
+		Dk=fill_queue(Dk);
+		//D.add(Dk);
+		
+		//calculate the optimal dominant
+		dominant opt_dom;
+		opt_dom = cal_opt_dom(Dk);
+		
+		//construct the optimal subgraph
+		
+	}
+
+	//construct the optimal subgraph
+	public NCSG(dominant source_point, int StepLength, List<int[][]> STL, char[] alphabet,int d){
+		LinkedList<dominant> queue = new LinkedList<dominant>();
+		Iterator<dominant> itq = queue.iterator();
+		queue.addAll(source_point.successor);
+		while (itq.hasNext()){
+			dominant q = itq.next();
+			Iterator<dominant> itqs =q.successor.iterator();
+			while (itqs.hasNext()){
+				dominant v = itqs.next();
+				if (!DM.containsValue(v)){
+					queue.add(v);
+					DM.put(v.indexofpoint, v);
+				}
+				else{
+					v.ID++;
+				}
+			}
+		}
+		dominant end_point = new dominant(STL, d, alphabet);
+		end_point.end(d);
+	}
+	
+	// ----------------------------------------------------------------------------------construction
+	public NCSG(int d, int StepLength, List<int[][]> STL, char[] alphabet) { // time:to
+																				// judge
+																				// whether
+																				// necessary
+																				// to
+																				// add
+																				// a
+																				// source
+		// function: deal with the sub-graph with source point
+		List<dominant> queue = new LinkedList<dominant>();
+		dominant v = null;
+		LinkedList<dominant> Dk = new LinkedList<dominant>();
+		D.add(Dk);
+		// Iterator<LinkedList<dominant>> itD =D.iterator();
+
+		// add a dummy source point
+		dominant source_point = new dominant(STL, d, alphabet);
+		source_point.source(d);
+		queue.add(source_point);
+		DM.put(source_point.indexofpoint, source_point);
+		// create dominant (DM)
+		Dk.add(source_point);
+		queue = fill_queue(Dk);// fill the queue
+
+		Iterator<dominant> it = queue.iterator();
+		while (!queue.isEmpty()) { // add points
+			dominant q = it.next();
+			queue.remove(q);
+			q.dominant_successor(STL, d, alphabet);
+			Iterator<dominant> qits = q.successor.iterator();
+			while (qits.hasNext()) {
+				v = qits.next();
+				if (!DM.containsValue(v)) {
+					queue.add(v);
+					DM.put(v.indexofpoint, v);
+					v.ID = 1;
+					v.level = q.level + 1;
+				} else {
+					v.ID++;
+				}
+			}
+		}
+		if (queue.isEmpty()) { // add an end point
+			dominant end_point=new dominant(STL, d, alphabet);
+			end_point.end(d);
+			// set precursor of the end point
+		}
+		maxIndex = v.indexofpoint + 1;
+	}
+
+	public NCSG(int d, int StepLength, List<int[][]> STL, Set<dominant> DM) {// deal
+																				// with
+																				// the
+																				// sub-graph
+																				// without
+																				// the
+																				// source
+																				// point
+		List<dominant> queue = new LinkedList<dominant>();
+		dominant v = null;
+		Iterator<dominant> it = queue.iterator();
+		while (!queue.isEmpty()) { // add points
+			dominant q = it.next();
+			queue.remove(q);
+			Iterator<dominant> qits = q.successor.iterator();
+			while (qits.hasNext()) {
+				v = qits.next();
+				if (!DM.contains(v)) {
+					queue.add(v);
+					DM.add(v);
+					v.ID = 1;
+					v.level = q.level + 1;
+				} else {
+					v.ID++;
+				}
+			}
+		}
+		maxIndex = v.indexofpoint + 1;
+	}
+
+	public int ForwardTopSort(LinkedList<LinkedList<dominant>> D,int d,List<int[][]> STL, ) { // sort(forward)
+		int maxLevel;
+		int k = 0;
+		maxLevel = k - 1;
+		Iterator<LinkedList<dominant>> itD = D.iterator();
+		while (itD.hasNext()){
+			LinkedList<dominant> Dk = new LinkedList<dominant>();
+			Dk=itD.next();
+			LinkedList<dominant> Dk_plus_1 = new LinkedList<dominant>();
+			Iterator<dominant> itDk = Dk.iterator();
+			while (itDk.hasNext()){
+				dominant q = itDk.next();
+				Iterator<dominant> itDksu = q.successor.iterator();
+				while (itDksu.hasNext()){
+					dominant v = itDksu.next();
+					v.level = q.level+1;
+					//to judge if v is the immediate successor
+					v.ID--;
+					if (v.ID==0){
+						Dk_plus_1.add(v);
+					}
+				}
+				//if q has no successor
+				if (!itDksu.hasNext()){
+					//construct an end point
+					dominant end_point=new dominant(STL, d, alphabet);
+					end_point.end(d);
+				}
+			}
+			++k;
+		}
+		maxLevel=k-1;
+		return maxLevel;
+	}
+
+	public void BackwardTopSort(LinkedList<LinkedList<dominant>> D) { // sort(backward)
+		int k=0;
+		ListIterator<LinkedList<dominant>> itDk =D.listIterator();
+		while (itDk.hasPrevious()){
+			
+		}
+	}
+}
