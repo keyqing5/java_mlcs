@@ -18,7 +18,7 @@ public class dominant {
 	public Set<dominant> precursor = new HashSet<dominant>(); // precursor
 	// Iterator<dominant> itp = precursor.iterator();
 
-	public dominant(List<int[][]> STL, int d, char[] alphabet) { // construct a completely new dominant ,d means the
+	public dominant(int d) { // construct a completely new dominant ,d means the
 								// dimension
 		ID = 1;
 		level = 0;
@@ -26,12 +26,13 @@ public class dominant {
 		//dominant_successor(STL,d,alphabet);
 	}
 
-	public void source(int d) { // add a dummy source point
+	public void source(int d,List<int[][]> STL, char[] alphabet) { // add a dummy source point
 		ID = 0;
 		level = 0;
 		for (int i = 0; i < d; ++i) {
 			coordinate.add(0);
 		}
+		dominant_successor(STL, d, alphabet);
 	}
 
 	public void end(int d) { // add a dummy end point
@@ -66,7 +67,7 @@ public class dominant {
 		int alpha_size = alphabet.length;
 		Iterator<Integer> itc = coordinate.iterator();
 		for (int i = 1; i <= alpha_size; ++i) {
-			dominant new_point = new dominant(STL,d,alphabet);
+			dominant new_point = new dominant(d);
 			for (int j = 0; j < d; ++j) { // read successor table
 				int[][] ST;
 				int k = itc.next();

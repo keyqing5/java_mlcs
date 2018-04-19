@@ -1,0 +1,7 @@
+package mlcs_classical_ex;
+
+public class MLCS {
+	// a class to keep the final result
+	int length;
+	String content;
+}

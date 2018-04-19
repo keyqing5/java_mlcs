@@ -1,10 +1,13 @@
 package mlcs_classical_ex;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.Scanner;
+import java.util.Set;
 
 public class main_pro {
 
@@ -13,10 +16,12 @@ public class main_pro {
 	// Construct successor table
 	static int[][] construct_ST(String str) { 
 		int len = str.length();
-		int[][] ST = new int[4][len + 1]; // from the first line :A C G T
+		// from the first line :A C G T
+		int[][] ST = new int[4][len + 1]; 
 		char str_alpha = 0;
 		for (int i = 0; i < 4; ++i) {
-			for (int j = 0; j <= len; ++j) { // fill the table
+			// fill the table
+			for (int j = 0; j <= len; ++j) { 
 				for (int k = j; k < len; ++k) {
 					str_alpha = str.charAt(k);
 					if (alphabet[i] == str_alpha) {
@@ -32,9 +37,8 @@ public class main_pro {
 		return ST;
 	}
 
-	static List<int[][]> construct_ST_list(int d, List<String> S) { // construct
-																	// a list
-																	// for ST
+	//construct a list for ST
+	static List<int[][]> construct_ST_list(int d, List<String> S) { 
 		List<int[][]> STL = new LinkedList<int[][]>();
 		for (int i = 0; i < d; ++i) {
 			String str = S.get(i);
@@ -44,7 +48,8 @@ public class main_pro {
 		return STL;
 	}
 	
-	static int min_length (List<String> S){ //find the minimum of length, return n
+	//find the minimum of length, return n
+	static int min_length (List<String> S){ 
 		int min_len;
 		Iterator<String> itS = S.iterator();
 		min_len = itS.next().length();
@@ -55,6 +60,17 @@ public class main_pro {
 			}
 		}
 		return min_len;
+	}
+	
+	//compute MLCS information
+	MLCS compute_answer (result fin_re){
+		MLCS answer = new MLCS();
+		//|MLCS|
+		answer.length=fin_re.maxLevel-1;
+		//specific content of MLCS 
+		Map<Integer, Set<dominant>> Dmap = new HashMap<Integer, Set<dominant>>();
+		Dmap.putAll(fin_re.Graph);
+		return answer;
 	}
 
 	public static void main(String[] args) {
@@ -84,14 +100,21 @@ public class main_pro {
 		int StepLength = sc.nextInt();
 		
 		//judge between n and StepLength
+		MLCS answer = new MLCS();
 		if (StepLength>n){
-			dominant source_point= new dominant(STL, d, alphabet);
-			source_point.source(d);
+			dominant source_point= new dominant(d);
+			source_point.source(d, STL, alphabet);
 			
 			//optcalreuse1,time=1
-			//NCSG Graph = new NCSG(source_point,StepLength,STL,alphabet,d,1);
-			result fin_re;
-			fin_re = 
+			NCSG Graph = new NCSG();
+			//set initial value of result
+			result re0 = new result();
+			re0.DW.add(source_point);
+			re0.minLevel = 0;
+			
+			//compute
+			result fin_re = new result();
+			fin_re = Graph.OptCalReusing1(STL, d, alphabet, StepLength, re0, 1);
 			
 			//output MLCS
 			
@@ -102,7 +125,7 @@ public class main_pro {
 		int N = n/StepLength + 1;
 		
 		//optcalreuse2
-		NCSG sub_graph;
+		NCSG sub_graph = new NCSG();
 		for (int i=1;i<=N-1;++i){
 			
 		}

@@ -11,43 +11,39 @@ import java.util.ListIterator;
 import java.util.Map;
 import java.util.Set;
 
-public class NCSG { // construct a picture
-	public Map<Integer, dominant> DM = new HashMap<Integer, dominant>(); // a
-																			// set
-																			// for
-																			// dominant
-	// key for indexOfpoints, value for dominant
-	public int maxIndex;
-	public Map<Integer, Set<dominant>> D = new HashMap<Integer, Set<dominant>>(); // a
-	// list
-	// composed
-	// of
-	// lists
-	// key for level, value for dominant
-	public ArrayList<Integer> opt_sub_dom = new ArrayList<Integer>(); // a list
-																		// for
-																		// save
-																		// index
-																		// of
-																		// points
-																		// in
-																		// optimal
-																		// subgraph
+//construct a picture
+public class NCSG {
+	
+	//-----------------------------Value-----------------------------------------
+	
+	// a set for dominant, key for indexOfpoints, value for dominant
+	public Map<Integer, dominant> DM = new HashMap<Integer, dominant>();
 
-	void fill_DM(Set<dominant> su) { // put all the point in the map into DM
+	// total number of dominant
+	public int maxIndex;
+
+	// a list composed of lists, key for level, value for dominant
+	public Map<Integer, Set<dominant>> D = new HashMap<Integer, Set<dominant>>();
+
+	// a list for saving index of points in the optimal subgraph
+	public ArrayList<Integer> opt_sub_dom = new ArrayList<Integer>();
+
+	// -------------------------------Function-----------------------------------
+	
+	// put all the point in the map into DM
+	void fill_DM(Set<dominant> su) {
 		Map<Integer, dominant> temp_DM = new HashMap<Integer, dominant>();
 		Iterator<dominant> itsu = su.iterator();
 		while (itsu.hasNext()) {
 			dominant dom = itsu.next();
-			temp_DM.put(dom.indexofpoint, dom);// put the point into temporary
-												// map
+			//put the point into temporary  map
+			temp_DM.put(dom.indexofpoint, dom);
 		}
 		DM.putAll(temp_DM);
 	}
 
-	LinkedList<dominant> fill_queue(Set<dominant> Dk, int StepLength, int time) { // fill
-																					// the
-																					// queue
+	//fill the queue
+	LinkedList<dominant> fill_queue(Set<dominant> Dk, int StepLength, int time) { 
 		LinkedList<dominant> queue = new LinkedList<dominant>();
 		// fill the queue with successor of all dominant of Dk
 		Iterator<dominant> itq = Dk.iterator();
@@ -64,8 +60,8 @@ public class NCSG { // construct a picture
 		return queue;
 	}
 
-	public int cal_dom_sum(List<Integer> coordinate) { // calculate the sum of
-														// coordinate
+	//calculate the sum of coordinate
+	public int cal_dom_sum(List<Integer> coordinate) { 
 		int dom_sum = 0;
 		Iterator<Integer> itdc = coordinate.iterator();
 		while (itdc.hasNext()) {
@@ -74,35 +70,30 @@ public class NCSG { // construct a picture
 		return dom_sum;
 	}
 
-	public dominant cal_opt_dom(Set<dominant> Dk, int minLevel) { // calculate
-																	// for
-																	// the
-		// optimal point
+	//  calculate for the optimal point
+	public dominant cal_opt_dom(Set<dominant> Dk, int minLevel) { 
 		int min_dom_sum;
 		dominant opt_dom;
 		Iterator<dominant> itdk = Dk.iterator();
 		opt_dom = itdk.next();
 		min_dom_sum = cal_dom_sum(opt_dom.coordinate);
-		while (itdk.hasNext()) { // through points in Dk
+		while (itdk.hasNext()) {
+			// through points in Dk
 			dominant temp_dom = itdk.next();
 			List<Integer> temp_coo = temp_dom.coordinate;
 			int temp_dom_sum = cal_dom_sum(temp_coo);
-			if (temp_dom.level == minLevel && temp_dom_sum < min_dom_sum) { // find
-																			// a
-																			// smaller
-																			// one
+			//find a smaller one
+			if (temp_dom.level == minLevel && temp_dom_sum < min_dom_sum) { 
 				min_dom_sum = temp_dom_sum;
 				opt_dom = temp_dom;
-			} else if (temp_dom.level == minLevel && temp_dom_sum == min_dom_sum) { // equal,
-																					// compare
-																					// number
-				// in every dimension
+			} else if (temp_dom.level == minLevel && temp_dom_sum == min_dom_sum) {
+				//equal, compare number in every dimension
 				Iterator<Integer> itdct = temp_coo.iterator();
 				Iterator<Integer> itdco = opt_dom.coordinate.iterator();
 				while (itdct.hasNext()) {
 					int temp_val = itdct.next().intValue();
 					int opt_val = itdco.next().intValue();
-					if (temp_val < opt_val) { 
+					if (temp_val < opt_val) {
 						// the number is not the same
 						min_dom_sum = temp_dom_sum;
 						opt_dom = temp_dom;
@@ -152,11 +143,11 @@ public class NCSG { // construct a picture
 			dominant dom = DM.get(k);
 			Set<dominant> successor = new HashSet<dominant>();
 			successor.addAll(dom.successor);
-			Iterator<dominant> itds =successor.iterator();
-			while (itds.hasNext()){
+			Iterator<dominant> itds = successor.iterator();
+			while (itds.hasNext()) {
 				dominant domsu = itds.next();
-				if (domsu.level!=(dom.level+1)){
-					//not the immediate successor
+				if (domsu.level != (dom.level + 1)) {
+					// not the immediate successor
 					dom.successor.remove(domsu);
 				}
 			}
@@ -173,10 +164,11 @@ public class NCSG { // construct a picture
 		// this function,and put into a list
 		// minLevel means the minimum level of the point who has a successor in
 		// the next subgraph
-		// time means the times the function is used, time>=1, i.e., the number of subgraph 
+		// time means the times the function is used, time>=1, i.e., the number
+		// of subgraph
 		int minLevel = re0.minLevel;
-		LinkedList<NCSG> Graph = new LinkedList<NCSG>(); // subgraph with
-															// StepLength
+		//subgraph with StepLength
+		LinkedList<NCSG> Graph = new LinkedList<NCSG>(); 
 		Set<dominant> Dk0 = new HashSet<dominant>();
 		Dk0.addAll(re0.DW);
 		fill_DM(re0.DW);
@@ -186,9 +178,10 @@ public class NCSG { // construct a picture
 		// D.add(Dk);
 
 		// actually is the first subgraph
-		dominant source_point = new dominant(STL, d, alphabet);
-		source_point.source(d);
+		dominant source_point = new dominant(d);
+		source_point.source(d, STL, alphabet);
 		if (Dk0.contains(source_point)) {
+			minLevel++;
 			// D0->D1
 			Dk.addAll(fill_queue(Dk0, StepLength, time));// D1
 			fill_DM(Dk);
@@ -208,7 +201,8 @@ public class NCSG { // construct a picture
 		// DM.put(source_point.indexofpoint, source_point);
 
 		// construct the optimal subgraph
-		NCSG subgraph = new NCSG(opt_dom, StepLength, STL, alphabet, d, time);
+		NCSG subgraph = new NCSG();
+		subgraph.construct_NCSG(opt_dom, StepLength, STL, alphabet, d, time);
 
 		// add index to the opt_sub_dom
 		int rotate_time = 1;
@@ -231,97 +225,103 @@ public class NCSG { // construct a picture
 			dominant non_opt_dom = itDk.next();
 			if (!non_opt_dom.equals(opt_dom)) {
 				// construct the non optimal subgraph
-				NCSG non_opt_subgraph = new NCSG(non_opt_dom, StepLength, STL, alphabet, d, time);
+				NCSG non_opt_subgraph = new NCSG();
+				non_opt_subgraph.construct_NCSG(non_opt_dom, StepLength, STL, alphabet, d, time);
 				non_opt_subgraph.ForwardTopSort(d, STL, alphabet, StepLength, time);
 				// upgrade re?
 				Graph.add(non_opt_subgraph);
 			}
 		}
-		
-		//arrange
+
+		// arrange
 		re.Graph.addAll(Graph);
 		return re;
 	}
 
-     //optcalreuse:1)-4)+6)
-	 public result OptCalReusing2(List<int[][]> STL, int d, char[] alphabet, int StepLength, result re0, int time){
-		    // the source point of the first subgraph should be set before using
-			// this function,and put into a list
-			// minLevel means the minimum level of the point who has a successor in
-			// the next subgraph
-			// time means the times the function is used, time>=1
-			int minLevel = re0.minLevel;
-			LinkedList<NCSG> Graph = new LinkedList<NCSG>(); // subgraph with
-																// StepLength
-			Set<dominant> Dk0 = new HashSet<dominant>();
-			Dk0.addAll(re0.DW);
-			fill_DM(re0.DW);
+	// optcalreuse:1)-4)+6)
+	public result OptCalReusing2(List<int[][]> STL, int d, char[] alphabet, int StepLength, result re0, int time) {
+		// the source point of the first subgraph should be set before using
+		// this function,and put into a list
+		// minLevel means the minimum level of the point who has a successor in
+		// the next subgraph
+		// time means the times the function is used, time>=1
+		int minLevel = re0.minLevel;
+		//subgraph with StepLength
+		LinkedList<NCSG> Graph = new LinkedList<NCSG>(); 
+		Set<dominant> Dk0 = new HashSet<dominant>();
+		Dk0.addAll(re0.DW);
+		fill_DM(re0.DW);
 
-			Set<dominant> Dk = new HashSet<dominant>();
+		Set<dominant> Dk = new HashSet<dominant>();
 
-			// D.add(Dk);
+		// D.add(Dk);
 
-			// actually is the first subgraph
-			dominant source_point = new dominant(STL, d, alphabet);
-			source_point.source(d);
-			if (Dk0.contains(source_point)) {
-				// D0->D1
-				Dk.addAll(fill_queue(Dk0, StepLength, time));// D1
-				fill_DM(Dk);
-			} else {
-				Dk.addAll(Dk0);
+		// actually is the first subgraph
+		dominant source_point = new dominant(d);
+		source_point.source(d,STL,alphabet);
+		if (Dk0.contains(source_point)) {
+			// D0->D1
+			Dk.addAll(fill_queue(Dk0, StepLength, time));// D1
+			fill_DM(Dk);
+		} else {
+			Dk.addAll(Dk0);
+		}
+
+		// D.add(Dk)
+		// calculate the optimal dominant //if level is 1
+		dominant opt_dom;
+		opt_dom = cal_opt_dom(Dk, minLevel);
+		opt_sub_dom.add(opt_dom.indexofpoint);
+
+		// // add a dummy source point
+		// dominant source_point = new dominant(STL,d,alphabet);
+		// source_point.source(d);
+		// DM.put(source_point.indexofpoint, source_point);
+
+		// construct the optimal subgraph
+		NCSG subgraph = new NCSG();
+		subgraph.construct_NCSG(opt_dom, StepLength, STL, alphabet, d, time);
+
+		// add index to the opt_sub_dom
+		int rotate_time = 1;
+		while (rotate_time <= subgraph.DM.size()) {
+			opt_sub_dom.add((subgraph.DM.get(rotate_time).indexofpoint));
+		}
+
+		// sort and layer (Forward Top Sort)
+		result re;
+		re = subgraph.ForwardTopSort(d, STL, alphabet, StepLength, time);
+
+		Graph.add(subgraph);
+
+		// construct another subgraph and reuse
+		// find non-optimal dominant
+		Iterator<dominant> itDk = Dk.iterator();
+		while (itDk.hasNext()) {
+			dominant non_opt_dom = itDk.next();
+			if (!non_opt_dom.equals(opt_dom)) {
+				// construct the non optimal subgraph
+				NCSG non_opt_subgraph = new NCSG();
+				non_opt_subgraph.construct_NCSG(non_opt_dom, StepLength, STL, alphabet, d, rotate_time);
+				non_opt_subgraph.ForwardTopSort(d, STL, alphabet, StepLength, time);
+				// upgrade re?
+				Graph.add(non_opt_subgraph);
 			}
-
-			// D.add(Dk)
-			// calculate the optimal dominant //if level is 1
-			dominant opt_dom;
-			opt_dom = cal_opt_dom(Dk, minLevel);
-			opt_sub_dom.add(opt_dom.indexofpoint);
-
-			// // add a dummy source point
-			// dominant source_point = new dominant(STL,d,alphabet);
-			// source_point.source(d);
-			// DM.put(source_point.indexofpoint, source_point);
-
-			// construct the optimal subgraph
-			NCSG subgraph = new NCSG(opt_dom, StepLength, STL, alphabet, d, time);
-
-			// add index to the opt_sub_dom
-			int rotate_time = 1;
-			while (rotate_time <= subgraph.DM.size()) {
-				opt_sub_dom.add((subgraph.DM.get(rotate_time).indexofpoint));
-			}
-
-			// sort and layer (Forward Top Sort)
-			result re;
-			re = subgraph.ForwardTopSort(d, STL, alphabet, StepLength, time);
-			
-			Graph.add(subgraph);
-
-			// construct another subgraph and reuse
-			// find non-optimal dominant
-			Iterator<dominant> itDk = Dk.iterator();
-			while (itDk.hasNext()) {
-				dominant non_opt_dom = itDk.next();
-				if (!non_opt_dom.equals(opt_dom)) {
-					// construct the non optimal subgraph
-					NCSG non_opt_subgraph = new NCSG(non_opt_dom, StepLength, STL, alphabet, d, time);
-					non_opt_subgraph.ForwardTopSort(d, STL, alphabet, StepLength, time);
-					// upgrade re?
-					Graph.add(non_opt_subgraph);
-				}
-			}
-			return re;
-	 }
+		}
+		return re;
+	}
 
 	// construct the (non)optimal subgraph
-	public NCSG(dominant source_point, int StepLength, List<int[][]> STL, char[] alphabet, int d, int time) {
+	public void construct_NCSG(dominant source_point, int StepLength, List<int[][]> STL, char[] alphabet, int d,
+			int time) {
 
 		LinkedList<dominant> queue = new LinkedList<dominant>();
 		Iterator<dominant> itq = queue.iterator();
 		queue.addAll(source_point.successor);
 		while (itq.hasNext()) {
+			// put dominant in the queue into graph
 			dominant q = itq.next();
+			// put in successor of q
 			Iterator<dominant> itqs = q.successor.iterator();
 			while (itqs.hasNext()) {
 				dominant v = itqs.next();
@@ -329,6 +329,7 @@ public class NCSG { // construct a picture
 				if (opt_sub_dom.contains(v.indexofpoint)) {
 					continue;
 				}
+				// put new dominant into DM if it's in the graph
 				if (!DM.containsValue(v)) {
 					if (judge_in_this_subgraph(StepLength, time, v)) {
 						queue.add(v);
@@ -339,8 +340,10 @@ public class NCSG { // construct a picture
 				}
 			}
 		}
-		dominant end_point = new dominant(STL, d, alphabet);
-		end_point.end(d);
+		// //add an end point
+		// dominant end_point = new dominant(STL, d, alphabet);
+		// end_point.end(d);
+		// put every point in DM into D with its level
 		fill_D();
 	}
 
@@ -462,7 +465,7 @@ public class NCSG { // construct a picture
 				// if q has no successor
 				if (!itDksu.hasNext()) {
 					// construct an end point
-					dominant end_point = new dominant(STL, d, alphabet);
+					dominant end_point = new dominant(d);
 					end_point.end(d);
 				}
 			}
